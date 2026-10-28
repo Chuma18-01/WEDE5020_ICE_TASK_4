@@ -1,0 +1,833 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <!-- SEO META TAGS -->
+    <meta name="description"
+          content="Play SA Snake, a South African-themed
+          browser game with scores and a leaderboard.">
+
+    <meta name="keywords"
+          content="South Africa, Snake, game, JavaScript,
+          arcade, leaderboard, HTML, CSS">
+
+    <title>SA Snake Game | WEDE5020</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #edf4ef;
+            color: #233428;
+            text-align: center;
+        }
+
+        header {
+            background: #163e2c;
+            color: white;
+            padding: 25px 15px;
+        }
+
+        h1 {
+            font-size: 27px;
+        }
+
+        h2 {
+            color: #176438;
+        }
+
+        /* SOUTH AFRICAN FLAG - CSS ONLY */
+        .flag {
+            width: 300px;
+            height: 200px;
+            max-width: 100%;
+            margin: 15px auto;
+            position: relative;
+            overflow: hidden;
+            background:
+                linear-gradient(
+                    to bottom,
+                    #de3831 0 50%,
+                    #002395 50% 100%
+                );
+            border: 2px solid #eee;
+        }
+
+        .flag div {
+            position: absolute;
+            inset: 0;
+        }
+
+        .flag-white {
+            background: white;
+            clip-path: polygon(
+                0 0, 0 100%,
+                12% 100%, 45% 58%,
+                100% 58%, 100% 42%,
+                45% 42%, 12% 0
+            );
+        }
+
+        .flag-green {
+            background: #007a4d;
+            clip-path: polygon(
+                0 10%, 0 90%,
+                12% 90%, 43% 55%,
+                100% 55%, 100% 45%,
+                43% 45%, 12% 10%
+            );
+        }
+
+        .flag-yellow {
+            background: #ffb612;
+            clip-path: polygon(
+                0 10%, 0 90%,
+                34% 50%
+            );
+        }
+
+        .flag-black {
+            background: black;
+            clip-path: polygon(
+                0 17%, 0 83%,
+                28% 50%
+            );
+        }
+
+        main {
+            max-width: 800px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        section {
+            background: white;
+            margin: 20px 0;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 3px 12px #0001;
+        }
+
+        button {
+            background: #176438;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            padding: 12px 18px;
+            cursor: pointer;
+            font-size: 15px;
+            margin: 5px;
+            touch-action: manipulation;
+        }
+
+        button:hover {
+            background: #229753;
+        }
+
+        button:disabled {
+            background: #888;
+            cursor: not-allowed;
+        }
+
+        canvas {
+            background: #e4f2e4;
+            border: 4px solid #176438;
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 15px auto;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, 55px);
+            justify-content: center;
+            gap: 5px;
+            margin-top: 15px;
+        }
+
+        .controls button {
+            margin: 0;
+            padding: 12px 0;
+            font-size: 20px;
+        }
+
+        .up {
+            grid-column: 2;
+        }
+
+        .left {
+            grid-column: 1;
+        }
+
+        .down {
+            grid-column: 2;
+        }
+
+        .right {
+            grid-column: 3;
+        }
+
+        input {
+            padding: 12px;
+            margin: 8px auto;
+            width: 100%;
+            max-width: 320px;
+            border: 1px solid #aaa;
+            border-radius: 6px;
+        }
+
+        form {
+            margin: 15px auto;
+            max-width: 360px;
+        }
+
+        .error {
+            color: #b00020;
+            font-weight: bold;
+        }
+
+        .success {
+            color: #176438;
+            font-weight: bold;
+        }
+
+        #playerForm {
+            display: none;
+        }
+
+        ol {
+            display: inline-block;
+            text-align: left;
+            padding-left: 30px;
+        }
+
+        li {
+            padding: 5px;
+        }
+
+        iframe {
+            width: 100%;
+            height: 300px;
+            border: 0;
+            border-radius: 8px;
+        }
+
+        footer {
+            background: #163e2c;
+            color: white;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- TASK 4: CSS SOUTH AFRICAN FLAG -->
+<header>
+    <h1>This game is proudly South African.</h1>
+
+    <div class="flag"
+         role="img"
+         aria-label="South African national flag
+                     created entirely using CSS">
+
+        <div class="flag-white"></div>
+        <div class="flag-green"></div>
+        <div class="flag-yellow"></div>
+        <div class="flag-black"></div>
+    </div>
+
+    <h2 style="color:white;">SA Snake Game</h2>
+    <p>Eat food, grow your snake and beat the high score!</p>
+</header>
+
+<main>
+
+    <!-- TASK 5: GAME -->
+    <section>
+        <h2>Play Snake</h2>
+
+        <p>
+            Use the arrow keys or W, A, S, D
+            to move your snake.
+        </p>
+
+        <div class="stats">
+            <p>Score: <span id="score">0</span></p>
+            <p>Best: <span id="best">0</span></p>
+        </div>
+
+        <p id="gameStatus" aria-live="polite">
+            Press Start Game to begin!
+        </p>
+
+        <canvas
+                id="gameCanvas"
+                width="400"
+                height="400"
+                aria-label="Snake game board">
+        </canvas>
+
+        <button id="startButton">Start Game</button>
+
+        <button id="restartButton">Restart Game</button>
+
+        <h3>Mobile Controls</h3>
+
+        <div class="controls">
+            <button class="up" data-direction="up"
+                    aria-label="Move up">↑</button>
+            <button class="left" data-direction="left"
+                    aria-label="Move left">←</button>
+            <button class="down" data-direction="down"
+                    aria-label="Move down">↓</button>
+            <button class="right" data-direction="right"
+                    aria-label="Move right">→</button>
+        </div>
+    </section>
+
+    <!-- TOP 5 HIGH SCORES -->
+    <section>
+        <h2>Top 5 High Scores</h2>
+
+        <ol id="leaderboard"></ol>
+
+        <div id="playerForm">
+            <h3>Congratulations!</h3>
+
+            <p>
+                Your score reached the top five.
+                Enter your details to save it.
+            </p>
+
+            <form id="scoreForm" novalidate>
+
+                <label for="playerName">
+                    Player Name:
+                </label>
+
+                <br>
+
+                <input
+                        type="text"
+                        id="playerName"
+                        placeholder="At least 3 characters">
+
+                <br>
+
+                <label for="playerEmail">
+                    Email Address:
+                </label>
+
+                <br>
+
+                <input
+                        type="email"
+                        id="playerEmail"
+                        placeholder="example@email.com">
+
+                <br>
+
+                <button type="submit">
+                    Save High Score
+                </button>
+
+                <p id="formMessage"
+                   aria-live="polite"></p>
+
+            </form>
+        </div>
+    </section>
+
+    <!-- GOOGLE MAPS INTEGRATION -->
+    <section>
+        <h2>Our South African Inspiration</h2>
+
+        <p>
+            Our fictional game studio is inspired by
+            Cape Town, South Africa, home to
+            the famous Table Mountain.
+        </p>
+
+        <iframe
+                title="Google Map showing Table Mountain"
+                src="https://www.google.com/maps?q=Table%20Mountain%2C%20Cape%20Town&amp;output=embed"
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
+    </section>
+
+</main>
+
+<footer>
+    <p>&copy; 2026 SA Snake Game</p>
+    <p>Created for WEDE5020 ICE Tasks 4-6</p>
+</footer>
+
+<script>
+    "use strict";
+
+    // GAME ELEMENTS
+    const canvas =
+        document.getElementById("gameCanvas");
+
+    const ctx = canvas.getContext("2d");
+
+    const scoreDisplay =
+        document.getElementById("score");
+
+    const bestDisplay =
+        document.getElementById("best");
+
+    const gameStatus =
+        document.getElementById("gameStatus");
+
+    const startButton =
+        document.getElementById("startButton");
+
+    const restartButton =
+        document.getElementById("restartButton");
+
+    const leaderboard =
+        document.getElementById("leaderboard");
+
+    const playerForm =
+        document.getElementById("playerForm");
+
+    const scoreForm =
+        document.getElementById("scoreForm");
+
+    const formMessage =
+        document.getElementById("formMessage");
+
+    // GAME VARIABLES
+    const gridSize = 20;
+    const tileSize = 20;
+    const totalTiles = canvas.width / tileSize;
+
+    let snake = [];
+    let food = {x: 10, y: 10};
+
+    let direction = {x: 1, y: 0};
+    let nextDirection = {x: 1, y: 0};
+
+    let score = 0;
+    let gameState = "Start";
+    let gameTimer = null;
+
+    const storageKey = "saSnakeHighScores";
+
+    // LOAD SAVED HIGH SCORES
+    function loadScores() {
+        try {
+            const saved =
+                JSON.parse(localStorage.getItem(storageKey));
+
+            return Array.isArray(saved)
+                ? saved.filter(item =>
+                    typeof item.name === "string" &&
+                    Number.isFinite(item.score)
+                  ).sort((a, b) => b.score - a.score)
+                   .slice(0, 5)
+                : [];
+        } catch (error) {
+            return [];
+        }
+    }
+
+    let highScores = loadScores();
+
+    function saveScores() {
+        try {
+            localStorage.setItem(
+                storageKey,
+                JSON.stringify(highScores)
+            );
+        } catch (error) {
+            console.warn("Scores could not be saved.");
+        }
+    }
+
+    // UPDATE LEADERBOARD
+    function displayLeaderboard() {
+        leaderboard.innerHTML = "";
+
+        if (highScores.length === 0) {
+            const item = document.createElement("li");
+            item.textContent = "No scores yet. Play first!";
+            leaderboard.appendChild(item);
+        }
+
+        highScores.forEach(player => {
+            const item = document.createElement("li");
+
+            item.textContent =
+                player.name + " - " + player.score;
+
+            leaderboard.appendChild(item);
+        });
+
+        bestDisplay.textContent =
+            highScores.length > 0
+                ? highScores[0].score
+                : 0;
+    }
+
+    // CREATE RANDOM FOOD
+    function createFood() {
+        const available = [];
+
+        for (let y = 0; y < totalTiles; y++) {
+            for (let x = 0; x < totalTiles; x++) {
+
+                const occupied = snake.some(segment =>
+                    segment.x === x && segment.y === y
+                );
+
+                if (!occupied) {
+                    available.push({x, y});
+                }
+            }
+        }
+
+        if (available.length === 0) {
+            return null;
+        }
+
+        return available[
+            Math.floor(Math.random() * available.length)
+        ];
+    }
+
+    // START GAME
+    function startGame() {
+        clearInterval(gameTimer);
+
+        snake = [
+            {x: 5, y: 10},
+            {x: 4, y: 10},
+            {x: 3, y: 10}
+        ];
+
+        direction = {x: 1, y: 0};
+        nextDirection = {x: 1, y: 0};
+
+        score = 0;
+        scoreDisplay.textContent = score;
+
+        food = createFood();
+
+        gameState = "Playing";
+        gameStatus.textContent = "Game in progress!";
+
+        playerForm.style.display = "none";
+        formMessage.textContent = "";
+        scoreForm.reset();
+
+        drawGame();
+
+        gameTimer = setInterval(updateGame, 140);
+    }
+
+    // DRAW GAME BOARD
+    function drawGame() {
+        ctx.clearRect(
+            0, 0, canvas.width, canvas.height
+        );
+
+        ctx.fillStyle = "#e4f2e4";
+        ctx.fillRect(
+            0, 0, canvas.width, canvas.height
+        );
+
+        // Draw grid
+        ctx.strokeStyle = "#d0e4d0";
+
+        for (let i = 0; i <= totalTiles; i++) {
+            ctx.beginPath();
+            ctx.moveTo(i * tileSize, 0);
+            ctx.lineTo(i * tileSize, canvas.height);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(0, i * tileSize);
+            ctx.lineTo(canvas.width, i * tileSize);
+            ctx.stroke();
+        }
+
+        // Draw food
+        if (food) {
+            ctx.fillStyle = "#df3030";
+            ctx.beginPath();
+            ctx.arc(
+                food.x * tileSize + tileSize / 2,
+                food.y * tileSize + tileSize / 2,
+                tileSize / 2 - 2,
+                0,
+                Math.PI * 2
+            );
+            ctx.fill();
+        }
+
+        // Draw snake
+        snake.forEach((segment, index) => {
+            ctx.fillStyle =
+                index === 0 ? "#084c2b" : "#28a745";
+
+            ctx.fillRect(
+                segment.x * tileSize + 1,
+                segment.y * tileSize + 1,
+                tileSize - 2,
+                tileSize - 2
+            );
+        });
+    }
+
+    // UPDATE SNAKE MOVEMENT
+    function updateGame() {
+        if (gameState !== "Playing") {
+            return;
+        }
+
+        direction = {...nextDirection};
+
+        const head = {
+            x: snake[0].x + direction.x,
+            y: snake[0].y + direction.y
+        };
+
+        const eating =
+            food &&
+            head.x === food.x &&
+            head.y === food.y;
+
+        // Check wall collision
+        const hitWall =
+            head.x < 0 ||
+            head.x >= totalTiles ||
+            head.y < 0 ||
+            head.y >= totalTiles;
+
+        // Moving into the old tail position is allowed
+        // when the snake is not eating.
+        const bodyToCheck = eating
+            ? snake
+            : snake.slice(0, -1);
+
+        const hitBody = bodyToCheck.some(segment =>
+            segment.x === head.x &&
+            segment.y === head.y
+        );
+
+        if (hitWall || hitBody) {
+            endGame();
+            return;
+        }
+
+        snake.unshift(head);
+
+        if (eating) {
+            score += 10;
+            scoreDisplay.textContent = score;
+
+            food = createFood();
+
+            if (food === null) {
+                endGame(true);
+                return;
+            }
+        } else {
+            snake.pop();
+        }
+
+        drawGame();
+    }
+
+    // CHANGE DIRECTION
+    function changeDirection(newDirection) {
+        if (gameState !== "Playing") {
+            return;
+        }
+
+        const directions = {
+            up: {x: 0, y: -1},
+            down: {x: 0, y: 1},
+            left: {x: -1, y: 0},
+            right: {x: 1, y: 0}
+        };
+
+        const selected = directions[newDirection];
+
+        if (!selected) {
+            return;
+        }
+
+        // Prevent reversing into the snake
+        if (
+            selected.x === -direction.x &&
+            selected.y === -direction.y
+        ) {
+            return;
+        }
+
+        nextDirection = selected;
+    }
+
+    // KEYBOARD EVENT LISTENER
+    document.addEventListener("keydown", event => {
+        const keys = {
+            ArrowUp: "up",
+            ArrowDown: "down",
+            ArrowLeft: "left",
+            ArrowRight: "right",
+            w: "up",
+            s: "down",
+            a: "left",
+            d: "right"
+        };
+
+        const key = keys[event.key] ||
+                    keys[event.key.toLowerCase()];
+
+        // Allow normal typing in form fields
+        if (
+            event.target.tagName === "INPUT" ||
+            event.target.tagName === "TEXTAREA"
+        ) {
+            return;
+        }
+
+        if (key) {
+            event.preventDefault();
+            changeDirection(key);
+        }
+    });
+
+    // MOBILE BUTTON EVENT LISTENERS
+    document.querySelectorAll(
+        "[data-direction]"
+    ).forEach(button => {
+
+        button.addEventListener("click", () => {
+            changeDirection(button.dataset.direction);
+        });
+
+    });
+
+    // GAME OVER
+    function endGame(won = false) {
+        clearInterval(gameTimer);
+
+        gameState = "Game Over";
+
+        gameStatus.textContent = won
+            ? "Amazing! You filled the board! Score: " + score
+            : "Game Over! Your score: " + score;
+
+        // Check if score belongs in top five
+        const qualifies =
+            score > 0 &&
+            (
+                highScores.length < 5 ||
+                score > highScores[4].score
+            );
+
+        if (qualifies) {
+            playerForm.style.display = "block";
+        } else {
+            playerForm.style.display = "none";
+        }
+    }
+
+    // VALIDATE PLAYER FORM
+    scoreForm.addEventListener("submit", event => {
+        event.preventDefault();
+
+        const name =
+            document.getElementById("playerName")
+            .value.trim();
+
+        const email =
+            document.getElementById("playerEmail")
+            .value.trim();
+
+        formMessage.className = "error";
+
+        // Validate name
+        if (name.length < 3) {
+            formMessage.textContent =
+                "Name must contain at least 3 characters.";
+            return;
+        }
+
+        // Validate email
+        const emailPattern =
+            /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailPattern.test(email)) {
+            formMessage.textContent =
+                "Please enter a valid email address.";
+            return;
+        }
+
+        // Save qualifying player
+        highScores.push({
+            name: name,
+            score: score
+        });
+
+        highScores.sort(
+            (a, b) => b.score - a.score
+        );
+
+        highScores = highScores.slice(0, 5);
+
+        saveScores();
+        displayLeaderboard();
+
+        playerForm.style.display = "none";
+
+        gameStatus.textContent =
+            "High score saved successfully!";
+    });
+
+    // START AND RESTART BUTTONS
+    startButton.addEventListener(
+        "click", startGame
+    );
+
+    restartButton.addEventListener(
+        "click", startGame
+    );
+
+    // INITIAL SCREEN
+    displayLeaderboard();
+
+    snake = [
+        {x: 5, y: 10},
+        {x: 4, y: 10},
+        {x: 3, y: 10}
+    ];
+
+    drawGame();
+
+</script>
+
+</body>
+</html>
